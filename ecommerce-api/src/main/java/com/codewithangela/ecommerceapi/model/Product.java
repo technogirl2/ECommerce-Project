@@ -1,6 +1,5 @@
 package com.codewithangela.ecommerceapi.model;
 
-import com.codewithangela.ecommerceapi.constants.SnackType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +15,7 @@ public class Product {
     private String imageUrl;
     private String brand;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne
+    @JoinColumn(name = "snack_type_id", referencedColumnName = "id")
     private SnackType snackType;
 }
