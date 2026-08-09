@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { getSnackTypeLabel } from '../../constants/snackTypes'
 import { useCart } from '../../context/CartContext'
 import type { Product } from '../../types/product'
 import './ProductPopComponent.css'
@@ -98,7 +97,7 @@ function ProductPopComponent({ product, onClose }: ProductPopComponentProps) {
           <div className="product-pop-info">
             <h2 className="product-pop-name">{product.name}</h2>
             <p className="product-pop-meta">
-              {product.brand} · {getSnackTypeLabel(product.snackType)}
+              {product.brand} · {product.snackType.name}
             </p>
           </div>
 

@@ -4,8 +4,9 @@ import Header from '../../components/Header/Header'
 import FilterPanel, { DEFAULT_FILTER_VALUE, type FilterValue } from '../../components/FilterPanel/FilterPanel'
 import { API_BASE_URL } from '../../config/api'
 import { authFetch } from '../../util/authFetch'
-import { SNACK_TYPE_OPTIONS, getSnackTypeLabel } from '../../constants/snackTypes'
+import { fetchSnackTypes } from '../../api/snackTypes'
 import type { Product } from '../../types/product'
+import type { SnackType } from '../../types/snackType'
 import './AdminProductsPage.css'
 
 interface ProductForm {
@@ -15,7 +16,7 @@ interface ProductForm {
   snackType: string
 }
 
-const EMPTY_FORM: ProductForm = { name: '', price: '', brand: '', snackType: SNACK_TYPE_OPTIONS[0].value }
+const EMPTY_FORM: ProductForm = { name: '', price: '', brand: '', snackType: '' }
 
 const formatPrice = (value: number) =>
   value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
@@ -26,6 +27,7 @@ function AdminProductsPage() {
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<FilterValue>(DEFAULT_FILTER_VALUE)
+  const [snackTypes, setSnackTypes] = useState<SnackType[]>([])
 
   const [editingId, setEditingId] = useState<number | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
@@ -49,7 +51,15 @@ function AdminProductsPage() {
 
   useEffect(() => {
     fetchProducts()
+    fetchSnackTypes()
+      .then(setSnackTypes)
+      .catch(() => setError('Unable to load snack types. Please try again later.'))
   }, [])
+
+  const categoryOptions = useMemo(
+    () => snackTypes.map((snackType) => ({ value: String(snackType.id), label: snackType.name })),
+    [snackTypes],
+  )
 
   const brandOptions = useMemo(() => {
     const brands = new Set(products.map((product) => product.brand))
@@ -68,7 +78,7 @@ function AdminProductsPage() {
       if (filter.brands.length > 0 && !filter.brands.includes(product.brand)) return false
       if (
         filter.categories.length > 0 &&
-        !filter.categories.includes(product.snackType)
+        !filter.categories.includes(String(product.snackType.id))
       )
         return false
       return true
@@ -93,7 +103,7 @@ function AdminProductsPage() {
 
   const openAddForm = () => {
     setEditingId(null)
-    setForm(EMPTY_FORM)
+    setForm({ ...EMPTY_FORM, snackType: snackTypes[0] ? String(snackTypes[0].id) : '' })
     setImageFile(null)
     setFormError('')
     setIsFormOpen(true)
@@ -105,7 +115,7 @@ function AdminProductsPage() {
       name: product.name,
       price: String(product.price),
       brand: product.brand,
-      snackType: product.snackType,
+      snackType: String(product.snackType.id),
     })
     setImageFile(null)
     setFormError('')
@@ -188,7 +198,7 @@ function AdminProductsPage() {
           value={filter}
           onChange={setFilter}
           brandOptions={brandOptions}
-          categoryOptions={SNACK_TYPE_OPTIONS}
+          categoryOptions={categoryOptions}
         />
         <div className="admin-products-page">
         <div className="admin-products-header">
@@ -235,9 +245,9 @@ function AdminProductsPage() {
                   value={form.snackType}
                   onChange={(e) => updateField('snackType', e.target.value)}
                 >
-                  {SNACK_TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
+                  {snackTypes.map((snackType) => (
+                    <option key={snackType.id} value={snackType.id}>
+                      {snackType.name}
                     </option>
                   ))}
                 </select>
@@ -295,7 +305,7 @@ function AdminProductsPage() {
                 <div className="admin-products-item-info">
                   <p className="admin-products-item-name">{product.name}</p>
                   <p className="admin-products-item-meta">
-                    {product.brand} · {getSnackTypeLabel(product.snackType)}
+                    {product.brand} · {product.snackType.name}
                   </p>
                 </div>
 
