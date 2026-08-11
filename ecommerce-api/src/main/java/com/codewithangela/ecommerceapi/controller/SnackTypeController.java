@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class SnackTypeController {
@@ -36,8 +37,32 @@ public class SnackTypeController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("update-snack-type/{id}")
+    public ResponseEntity<?> updateSnackType(@PathVariable int id, @RequestBody SnackType snackType) {
+        if (snackType.getName() == null || snackType.getName().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Snack type name is required."));
+        }
+
+        return snackTypeService.updateSnackTypeName(id, snackType.getName())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("delete-snack-type/{id}")
-    public ResponseEntity<SnackType> deleteSnackType(@PathVariable int id) {
+    public ResponseEntity<?> deleteSnackType(@PathVariable int id) {
+        if (snackTypeService.getSnackTypeById(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        long productCount = snackTypeService.countProductsUsingSnackType(id);
+        if (productCount > 0) {
+            String message = String.format(
+                    "%d product%s %s this category, so it can't be deleted.",
+                    productCount, productCount == 1 ? "" : "s", productCount == 1 ? "has" : "have");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", message));
+        }
+
         return snackTypeService.deleteSnackType(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

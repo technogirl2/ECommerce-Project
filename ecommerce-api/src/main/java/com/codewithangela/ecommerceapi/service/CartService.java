@@ -52,6 +52,11 @@ public class CartService {
         return Optional.of(cart);
     }
 
+    public Optional<Integer> getProductIdForItem(User user, int itemId) {
+        Cart cart = getCartForUser(user);
+        return findItemInCart(cart, itemId).map(item -> item.getProduct().getId());
+    }
+
     public Optional<Cart> updateItemQuantity(User user, int itemId, int quantity) {
         Cart cart = getCartForUser(user);
         Optional<CartItem> existingItem = findItemInCart(cart, itemId);

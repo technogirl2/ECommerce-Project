@@ -78,6 +78,14 @@
             <version>${aws-sdk-version}</version>
         </dependency>
 
+        <!-- AWS SDK's SES integration -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>ses</artifactId>
+            <version>${aws-sdk-version}</version>
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>

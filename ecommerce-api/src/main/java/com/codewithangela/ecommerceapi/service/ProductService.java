@@ -18,6 +18,9 @@ public class ProductService {
     @Autowired
     private MediaService mediaService;
 
+    @Autowired
+    private InventoryService inventoryService;
+
 
     public List<Product> getAllProducts() {
         return repo.findAll();
@@ -28,7 +31,9 @@ public class ProductService {
     }
 
     public Product addProduct(Product product) {
-        return repo.save(product);
+        Product saved = repo.save(product);
+        inventoryService.createInventoryForProduct(saved);
+        return saved;
     }
 
     public Optional<Product> deleteProduct(int id) {
