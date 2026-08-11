@@ -5,13 +5,16 @@ import type { Product } from '../../types/product'
 import './ProductCard.css'
 
 interface ProductCardProps extends Product {
+  quantity?: number
   onClick?: () => void
 }
 
-function ProductCard({ id, name, price, imageUrl, onClick }: ProductCardProps) {
+function ProductCard({ id, name, price, imageUrl, quantity, onClick }: ProductCardProps) {
   const { getCartItemForProduct, addItem, updateItemQuantity } = useCart()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const cartItem = getCartItemForProduct(id)
+  const isOutOfStock = quantity === 0
+  const isAtStockLimit = quantity !== undefined && !!cartItem && cartItem.quantity >= quantity
 
   const formattedPrice = price.toLocaleString('en-US', {
     style: 'currency',
@@ -85,8 +88,8 @@ function ProductCard({ id, name, price, imageUrl, onClick }: ProductCardProps) {
               type="button"
               className="product-card-stepper-btn"
               onClick={handleIncrement}
-              disabled={isSubmitting}
-              aria-label="Increase quantity"
+              disabled={isSubmitting || isOutOfStock || isAtStockLimit}
+              aria-label={isAtStockLimit ? 'No more in stock' : 'Increase quantity'}
             >
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <line x1="12" y1="5" x2="12" y2="19" />
@@ -94,6 +97,10 @@ function ProductCard({ id, name, price, imageUrl, onClick }: ProductCardProps) {
               </svg>
             </button>
           </div>
+        ) : isOutOfStock ? (
+          <button type="button" className="product-card-add product-card-add-disabled" disabled>
+            Out of stock
+          </button>
         ) : (
           <button
             type="button"
@@ -113,6 +120,9 @@ function ProductCard({ id, name, price, imageUrl, onClick }: ProductCardProps) {
       <div className="product-card-body">
         <h3 className="product-card-name">{name}</h3>
         <p className="product-card-price">{formattedPrice}</p>
+        {isAtStockLimit && (
+          <p className="product-card-stock-warning">No more in stock</p>
+        )}
       </div>
     </div>
   )

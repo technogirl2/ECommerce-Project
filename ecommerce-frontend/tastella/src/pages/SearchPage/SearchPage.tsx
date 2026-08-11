@@ -4,6 +4,7 @@ import ProductCard from '../../components/ProductCard/ProductCard'
 import ProductPopComponent from '../../components/ProductPopComponent/ProductPopComponent'
 import FilterPanel, { DEFAULT_FILTER_VALUE, type FilterValue } from '../../components/FilterPanel/FilterPanel'
 import { fetchSnackTypes } from '../../api/snackTypes'
+import { fetchAllInventory } from '../../api/inventory'
 import { API_BASE_URL } from '../../config/api'
 import { authFetch } from '../../util/authFetch'
 import type { Product } from '../../types/product'
@@ -20,6 +21,7 @@ function SearchPage() {
   const [filter, setFilter] = useState<FilterValue>(DEFAULT_FILTER_VALUE)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [snackTypes, setSnackTypes] = useState<SnackType[]>([])
+  const [quantityByProductId, setQuantityByProductId] = useState<Record<number, number>>({})
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -39,7 +41,19 @@ function SearchPage() {
       }
     }
 
+    const loadInventory = async () => {
+      try {
+        const inventory = await fetchAllInventory()
+        setQuantityByProductId(
+          Object.fromEntries(inventory.map((item) => [item.product.id, item.quantity])),
+        )
+      } catch {
+        // Stock badges are a nice-to-have; the server still rejects out-of-stock purchases.
+      }
+    }
+
     fetchProducts()
+    loadInventory()
     fetchSnackTypes()
       .then(setSnackTypes)
       .catch(() => setError('Unable to load snack types. Please try again later.'))
@@ -112,6 +126,7 @@ function SearchPage() {
                 imageUrl={product.imageUrl}
                 brand={product.brand}
                 snackType={product.snackType}
+                quantity={quantityByProductId[product.id]}
                 onClick={() => setSelectedProduct(product)}
               />
             ))
@@ -124,6 +139,7 @@ function SearchPage() {
       {selectedProduct && (
         <ProductPopComponent
           product={selectedProduct}
+          quantity={quantityByProductId[selectedProduct.id]}
           onClose={() => setSelectedProduct(null)}
         />
       )}

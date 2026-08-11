@@ -6,6 +6,7 @@ import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog'
 import { API_BASE_URL } from '../../config/api'
 import { authFetch } from '../../util/authFetch'
 import { addSnackType, deleteSnackType, fetchSnackTypes, updateSnackType } from '../../api/snackTypes'
+import { fetchAllInventory, fetchInventoryByProductId, updateInventoryQuantity } from '../../api/inventory'
 import type { Product } from '../../types/product'
 import type { SnackType } from '../../types/snackType'
 import './AdminProductsPage.css'
@@ -18,9 +19,23 @@ interface ProductForm {
 }
 
 const EMPTY_FORM: ProductForm = { name: '', price: '', brand: '', snackType: '' }
+const LOW_STOCK_THRESHOLD = 10
 
 const formatPrice = (value: number) =>
   value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+
+const quantityBadgeClass = (qty: number | undefined) => {
+  if (qty === 0) return 'admin-products-item-quantity-badge admin-products-item-quantity-badge-zero'
+  if (qty !== undefined && qty < LOW_STOCK_THRESHOLD)
+    return 'admin-products-item-quantity-badge admin-products-item-quantity-badge-low'
+  return 'admin-products-item-quantity-badge'
+}
+
+const quantityLabel = (qty: number | undefined) => {
+  if (qty === undefined) return 'Unknown'
+  if (qty === 0) return 'Out of stock'
+  return `${qty} in stock`
+}
 
 function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -39,6 +54,12 @@ function AdminProductsPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [confirmDeleteProduct, setConfirmDeleteProduct] = useState<Product | null>(null)
   const [productDeleteError, setProductDeleteError] = useState('')
+
+  const [inventoryId, setInventoryId] = useState<number | null>(null)
+  const [quantity, setQuantity] = useState('')
+  const [isLoadingInventory, setIsLoadingInventory] = useState(false)
+  const [inventoryError, setInventoryError] = useState('')
+  const [quantityByProductId, setQuantityByProductId] = useState<Record<number, number>>({})
 
   const [isAddingCategory, setIsAddingCategory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
@@ -64,8 +85,24 @@ function AdminProductsPage() {
     }
   }
 
+  const loadInventory = async () => {
+    try {
+      const inventory = await fetchAllInventory()
+      setQuantityByProductId(
+        Object.fromEntries(inventory.map((item) => [item.product.id, item.quantity])),
+      )
+    } catch {
+      // Quantities are a nice-to-have on the list; the edit form re-fetches its own value.
+    }
+  }
+
   useEffect(() => {
-    fetchProducts()
+    void (async () => {
+      await fetchProducts()
+    })()
+    void (async () => {
+      await loadInventory()
+    })()
     fetchSnackTypes()
       .then(setSnackTypes)
       .catch(() => setError('Unable to load snack types. Please try again later.'))
@@ -123,9 +160,12 @@ function AdminProductsPage() {
     setFormError('')
     setIsFormOpen(true)
     closeAddCategory()
+    setInventoryId(null)
+    setQuantity('0')
+    setInventoryError('')
   }
 
-  const openEditForm = (product: Product) => {
+  const openEditForm = async (product: Product) => {
     setEditingId(product.id)
     setForm({
       name: product.name,
@@ -137,12 +177,29 @@ function AdminProductsPage() {
     setFormError('')
     setIsFormOpen(true)
     closeAddCategory()
+
+    setInventoryId(null)
+    setQuantity('')
+    setInventoryError('')
+    setIsLoadingInventory(true)
+    try {
+      const inventory = await fetchInventoryByProductId(product.id)
+      setInventoryId(inventory.id)
+      setQuantity(String(inventory.quantity))
+    } catch {
+      setInventoryError('Unable to load current quantity.')
+    } finally {
+      setIsLoadingInventory(false)
+    }
   }
 
   const closeForm = () => {
     setIsFormOpen(false)
     setEditingId(null)
     closeAddCategory()
+    setInventoryId(null)
+    setQuantity('')
+    setInventoryError('')
   }
 
   const closeAddCategory = () => {
@@ -255,6 +312,11 @@ function AdminProductsPage() {
       setFormError('Choose a product image.')
       return
     }
+    const quantityValue = Number(quantity)
+    if (!quantity.trim() || !Number.isInteger(quantityValue) || quantityValue < 0) {
+      setFormError('Enter a valid quantity.')
+      return
+    }
 
     const body = new FormData()
     if (editingId !== null) body.append('id', String(editingId))
@@ -275,7 +337,18 @@ function AdminProductsPage() {
         throw new Error('Failed to save product')
       }
 
+      if (editingId !== null) {
+        if (inventoryId !== null) {
+          await updateInventoryQuantity(inventoryId, quantityValue)
+        }
+      } else {
+        const savedProduct = (await response.json()) as Product
+        const inventory = await fetchInventoryByProductId(savedProduct.id)
+        await updateInventoryQuantity(inventory.id, quantityValue)
+      }
+
       await fetchProducts()
+      await loadInventory()
       closeForm()
     } catch {
       setFormError('Unable to save this product. Please try again.')
@@ -313,26 +386,8 @@ function AdminProductsPage() {
     }
   }
 
-  return (
-    <>
-      <Header onSearch={setQuery} showAccountMenu />
-      <div className="admin-products-layout">
-        <FilterPanel
-          value={filter}
-          onChange={setFilter}
-          brandOptions={brandOptions}
-          categoryOptions={categoryOptions}
-        />
-        <div className="admin-products-page">
-        <div className="admin-products-header">
-          <h1 className="admin-products-title">Manage products</h1>
-          <button type="button" className="admin-products-add-btn" onClick={openAddForm}>
-            + Add product
-          </button>
-        </div>
-
-        {isFormOpen && (
-          <form className="admin-products-form" onSubmit={handleSubmit}>
+  const renderForm = () => (
+    <form className="admin-products-form" onSubmit={handleSubmit}>
             <h2>{editingId === null ? 'Add product' : 'Edit product'}</h2>
 
             <div className="admin-products-form-grid">
@@ -496,6 +551,19 @@ function AdminProductsPage() {
                   </div>
                 )}
               </label>
+              <label className="admin-products-field">
+                <span>Quantity in stock</span>
+                <input
+                  type="number"
+                  step="1"
+                  min="0"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  disabled={isLoadingInventory}
+                  placeholder={isLoadingInventory ? 'Loading...' : ''}
+                />
+                {inventoryError && <p className="admin-products-error">{inventoryError}</p>}
+              </label>
               <label className="admin-products-field admin-products-field-full">
                 <span>{editingId === null ? 'Image' : 'Replace image (optional)'}</span>
                 <input
@@ -521,8 +589,28 @@ function AdminProductsPage() {
                 Cancel
               </button>
             </div>
-          </form>
-        )}
+    </form>
+  )
+
+  return (
+    <>
+      <Header onSearch={setQuery} showAccountMenu />
+      <div className="admin-products-layout">
+        <FilterPanel
+          value={filter}
+          onChange={setFilter}
+          brandOptions={brandOptions}
+          categoryOptions={categoryOptions}
+        />
+        <div className="admin-products-page">
+        <div className="admin-products-header">
+          <h1 className="admin-products-title">Manage products</h1>
+          <button type="button" className="admin-products-add-btn" onClick={openAddForm}>
+            + Add product
+          </button>
+        </div>
+
+        {isFormOpen && editingId === null && renderForm()}
 
         {isLoading ? (
           <p className="admin-products-empty">Loading products...</p>
@@ -534,7 +622,12 @@ function AdminProductsPage() {
           <p className="admin-products-empty">No products match your search or filters.</p>
         ) : (
           <ul className="admin-products-list">
-            {visibleProducts.map((product) => (
+            {visibleProducts.map((product) =>
+              isFormOpen && editingId === product.id ? (
+                <li key={product.id} className="admin-products-item admin-products-item-editing">
+                  {renderForm()}
+                </li>
+              ) : (
               <li key={product.id} className="admin-products-item">
                 {product.imageUrl ? (
                   <img
@@ -555,6 +648,12 @@ function AdminProductsPage() {
 
                 <p className="admin-products-item-price">{formatPrice(product.price)}</p>
 
+                <div className="admin-products-item-quantity">
+                  <span className={quantityBadgeClass(quantityByProductId[product.id])}>
+                    {quantityLabel(quantityByProductId[product.id])}
+                  </span>
+                </div>
+
                 <div className="admin-products-item-actions">
                   <button
                     type="button"
@@ -573,7 +672,8 @@ function AdminProductsPage() {
                   </button>
                 </div>
               </li>
-            ))}
+              ),
+            )}
           </ul>
         )}
         </div>

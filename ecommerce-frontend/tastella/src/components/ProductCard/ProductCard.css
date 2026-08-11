@@ -66,6 +66,10 @@
   cursor: not-allowed;
 }
 
+.product-card-add-disabled {
+  background: var(--text);
+}
+
 .product-card-stepper {
   gap: 6px;
   padding: 4px;
@@ -119,4 +123,11 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--accent);
+}
+
+.product-card-stock-warning {
+  margin: 2px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d92d20;
 }

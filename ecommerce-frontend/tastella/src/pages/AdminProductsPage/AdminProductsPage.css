@@ -346,6 +346,16 @@
   border-radius: 12px;
 }
 
+.admin-products-item-editing {
+  display: block;
+  padding: 0;
+  border: none;
+}
+
+.admin-products-item-editing .admin-products-form {
+  margin-bottom: 0;
+}
+
 .admin-products-item-image,
 .admin-products-item-image-placeholder {
   width: 56px;
@@ -379,6 +389,53 @@
   text-align: right;
   font-weight: 600;
   color: var(--text-h);
+}
+
+.admin-products-item-quantity {
+  width: 110px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-products-item-quantity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-products-item-quantity-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2f9e44;
+  flex-shrink: 0;
+}
+
+.admin-products-item-quantity-badge-low {
+  background: rgba(220, 124, 17, 0.12);
+  color: #b8630c;
+}
+
+.admin-products-item-quantity-badge-low::before {
+  background: #dc7c11;
+}
+
+.admin-products-item-quantity-badge-zero {
+  background: rgba(217, 45, 32, 0.1);
+  color: #d92d20;
+}
+
+.admin-products-item-quantity-badge-zero::before {
+  background: #d92d20;
 }
 
 .admin-products-item-actions {
