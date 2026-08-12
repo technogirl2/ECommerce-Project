@@ -41,6 +41,6 @@ public class OrderController {
     }
 
     private User currentUser(Authentication authentication) {
-        return userService.getUserByUsername(authentication.getName());
+        return userService.getUserByEmail(authentication.getName());
     }
 }
