@@ -95,6 +95,30 @@
   color: #2f9e44;
 }
 
+.login-resend {
+  margin: 0;
+  font-size: 14px;
+}
+
+.login-resend-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 .login-submit {
   padding: 10px 14px;
   border: none;

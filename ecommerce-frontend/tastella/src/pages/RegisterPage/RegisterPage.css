@@ -34,6 +34,8 @@
   color: var(--text-h);
 
   input {
+    width: 100%;
+    box-sizing: border-box;
     padding: 10px 14px;
     border-radius: 10px;
     border: 2px solid var(--border);
@@ -48,6 +50,37 @@
       box-shadow: 0 0 0 3px var(--accent-bg);
     }
   }
+}
+
+.register-password-wrap {
+  position: relative;
+  display: flex;
+}
+
+.register-password-wrap input {
+  padding-right: 40px;
+}
+
+.register-toggle-visibility {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.register-toggle-visibility:hover {
+  color: var(--text-h);
+  background: var(--code-bg);
 }
 
 .register-error {
