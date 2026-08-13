@@ -78,6 +78,9 @@ function OrderDetailPage() {
               <p className="order-detail-subtitle">
                 Order #{orderNumber} · Placed {formatDate(order.createdAt)}
               </p>
+              <p className="order-detail-email-notice">
+                A confirmation email is on its way to your inbox.
+              </p>
             </div>
 
             <div className="order-detail-layout">
