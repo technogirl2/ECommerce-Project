@@ -1,7 +1,7 @@
 package com.codewithangela.ecommerceapi.filter;
 
 import com.codewithangela.ecommerceapi.service.JWTService;
-import com.codewithangela.ecommerceapi.service.authUserDetailService;
+import com.codewithangela.ecommerceapi.service.AuthUserDetailService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -47,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // if not null, already verified
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = applicationContext.getBean(authUserDetailService.class).loadUserByUsername(email);
+            UserDetails userDetails = applicationContext.getBean(AuthUserDetailService.class).loadUserByUsername(email);
             if (jwtService.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

@@ -1,0 +1,44 @@
+<div style="background:#f4f4f7;padding:32px 16px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+  <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e5e0eb;">
+    <h1 style="margin:0 0 8px;font-size:22px;color:#08060d;">Order confirmed!</h1>
+    <p style="margin:0 0 24px;font-size:15px;line-height:1.5;color:#4b4b52;">
+      Thanks for your order. We're getting it ready.
+    </p>
+    <p style="margin:0 0 16px;font-size:13px;color:#8a8a92;">
+      Order #${orderId} &middot; Placed ${orderDate}
+    </p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+      ${itemsHtml}
+    </table>
+    <table style="width:100%;border-collapse:collapse;border-top:1px solid #e5e0eb;padding-top:8px;">
+      <tr>
+        <td style="padding-top:8px;font-size:14px;color:#4b4b52;">Subtotal</td>
+        <td style="padding-top:8px;font-size:14px;color:#08060d;text-align:right;">${subtotal}</td>
+      </tr>
+      <tr>
+        <td style="font-size:14px;color:#4b4b52;">Delivery</td>
+        <td style="font-size:14px;color:#08060d;text-align:right;">${deliveryFee}</td>
+      </tr>
+      <tr>
+        <td style="font-size:14px;color:#4b4b52;">Tax</td>
+        <td style="font-size:14px;color:#08060d;text-align:right;">${tax}</td>
+      </tr>
+      <tr>
+        <td style="padding-top:8px;font-size:15px;font-weight:600;color:#08060d;">Total</td>
+        <td style="padding-top:8px;font-size:15px;font-weight:600;color:#08060d;text-align:right;">${total}</td>
+      </tr>
+    </table>
+    <p style="margin:24px 0 8px;font-size:14px;font-weight:600;color:#08060d;">Delivery details</p>
+    <p style="margin:0 0 4px;font-size:14px;color:#4b4b52;">${street}, ${city} ${state} ${zip}</p>
+    <p style="margin:0 0 24px;font-size:14px;color:#4b4b52;">${deliveryLine}</p>
+    <p style="margin:0 0 24px;text-align:center;">
+      <a href="${orderLink}" style="display:inline-block;padding:12px 28px;background:#aa3bff;color:#ffffff;
+         border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;">
+        View my order
+      </a>
+    </p>
+    <p style="margin:0;font-size:13px;color:#8a8a92;">
+      Questions about your order? Just reply to this email.
+    </p>
+  </div>
+</div>

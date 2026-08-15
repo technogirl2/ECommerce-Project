@@ -6,10 +6,12 @@ import com.codewithangela.ecommerceapi.exception.EmailSendException;
 import com.codewithangela.ecommerceapi.exception.InvalidVerificationTokenException;
 import com.codewithangela.ecommerceapi.model.EmailVerificationToken;
 import com.codewithangela.ecommerceapi.model.User;
+import com.codewithangela.ecommerceapi.util.EmailTemplateLoader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -80,30 +82,7 @@ public class EmailVerificationService {
     }
 
     private String buildVerificationEmail(String link) {
-        return """
-                <div style="background:#f4f4f7;padding:32px 16px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
-                  <div style="max-width:420px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e5e0eb;">
-                    <h1 style="margin:0 0 16px;font-size:22px;color:#08060d;">Welcome to Tastella</h1>
-                    <p style="margin:0 0 24px;font-size:15px;line-height:1.5;color:#4b4b52;">
-                      Thanks for signing up! Confirm this is your email address to activate your account.
-                    </p>
-                    <p style="margin:0 0 24px;text-align:center;">
-                      <a href="%s" style="display:inline-block;padding:12px 28px;background:#aa3bff;color:#ffffff;
-                         border-radius:999px;text-decoration:none;font-weight:600;font-size:15px;">
-                        Verify my email
-                      </a>
-                    </p>
-                    <p style="margin:0 0 8px;font-size:13px;line-height:1.5;color:#8a8a92;">
-                      This link expires in 24 hours. If the button doesn't work, copy and paste this URL into your browser:
-                    </p>
-                    <p style="margin:0;font-size:13px;word-break:break-all;">
-                      <a href="%s" style="color:#aa3bff;">%s</a>
-                    </p>
-                    <p style="margin:24px 0 0;font-size:13px;color:#8a8a92;">
-                      Didn't create a Tastella account? You can safely ignore this email.
-                    </p>
-                  </div>
-                </div>
-                """.formatted(link, link, link);
+        String template = EmailTemplateLoader.load("verification-email.html");
+        return EmailTemplateLoader.render(template, Map.of("link", link));
     }
 }

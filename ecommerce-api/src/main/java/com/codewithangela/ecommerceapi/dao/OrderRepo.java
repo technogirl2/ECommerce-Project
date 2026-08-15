@@ -10,4 +10,6 @@ public interface OrderRepo extends JpaRepository<Order, Integer> {
     List<Order> findByUserIdOrderByCreatedAtDesc(int userId);
 
     Optional<Order> findByIdAndUserId(int id, int userId);
+
+    int countByUserIdAndIdLessThanEqual(int userId, int id);
 }

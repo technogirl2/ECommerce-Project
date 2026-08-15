@@ -7,7 +7,6 @@ import com.codewithangela.ecommerceapi.dto.ChangePasswordRequest;
 import com.codewithangela.ecommerceapi.dto.RefreshTokenRequest;
 import com.codewithangela.ecommerceapi.dto.ResendVerificationRequest;
 import com.codewithangela.ecommerceapi.dto.VerifyEmailRequest;
-import com.codewithangela.ecommerceapi.exception.InvalidVerificationTokenException;
 import com.codewithangela.ecommerceapi.model.User;
 import com.codewithangela.ecommerceapi.service.EmailVerificationService;
 import com.codewithangela.ecommerceapi.service.JWTService;
@@ -95,12 +94,7 @@ public class UserController {
 
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailRequest request) {
-        try {
-            emailVerificationService.verify(request.token());
-        } catch (InvalidVerificationTokenException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
-
+        emailVerificationService.verify(request.token());
         return ResponseEntity.ok(Map.of("message", "Email verified successfully."));
     }
 
