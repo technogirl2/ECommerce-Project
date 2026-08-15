@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
 
 import java.text.NumberFormat;
 import java.time.ZoneId;
@@ -117,7 +118,7 @@ public class OrderService {
         StringBuilder itemsHtml = new StringBuilder();
         for (OrderItem item : order.getItems()) {
             itemsHtml.append(EmailTemplateLoader.render(itemRowTemplate, Map.of(
-                    "productName", item.getProductName(),
+                    "productName", HtmlUtils.htmlEscape(item.getProductName()),
                     "quantity", String.valueOf(item.getQuantity()),
                     "lineTotal", currency.format(item.getUnitPrice() * item.getQuantity())
             )));
@@ -137,10 +138,10 @@ public class OrderService {
         values.put("deliveryFee", currency.format(order.getDeliveryFee()));
         values.put("tax", currency.format(order.getTax()));
         values.put("total", currency.format(order.getTotal()));
-        values.put("street", order.getStreet());
-        values.put("city", order.getCity());
-        values.put("state", order.getState());
-        values.put("zip", order.getZip());
+        values.put("street", HtmlUtils.htmlEscape(order.getStreet()));
+        values.put("city", HtmlUtils.htmlEscape(order.getCity()));
+        values.put("state", HtmlUtils.htmlEscape(order.getState()));
+        values.put("zip", HtmlUtils.htmlEscape(order.getZip()));
         values.put("deliveryLine", deliveryLine);
         values.put("orderLink", orderLink);
 

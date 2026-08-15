@@ -3,10 +3,13 @@ package com.codewithangela.ecommerceapi.service;
 
 import com.codewithangela.ecommerceapi.dao.ProductRepo;
 import com.codewithangela.ecommerceapi.model.Product;
+import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,6 +24,9 @@ public class ProductService {
     @Autowired
     private InventoryService inventoryService;
 
+    @Autowired
+    private ProductVectorService vectorService;
+
 
     public List<Product> getAllProducts() {
         return repo.findAll();
@@ -33,6 +39,7 @@ public class ProductService {
     public Product addProduct(Product product) {
         Product saved = repo.save(product);
         inventoryService.createInventoryForProduct(saved);
+        vectorService.indexProduct(saved);
         return saved;
     }
 
@@ -43,6 +50,7 @@ public class ProductService {
                 mediaService.deleteFile(product.getImageUrl());
             }
             repo.deleteById(id);
+            vectorService.deleteProduct(id);
         });
         return existing;
     }
@@ -50,6 +58,28 @@ public class ProductService {
     public Product updateProduct(Product product) {
 
         // JPA dp upsert operation, so save = update
-        return repo.save(product);
+        Product saved = repo.save(product);
+        vectorService.indexProduct(saved);
+        return saved;
+    }
+
+    public List<Product> searchProducts(String query, int topK) {
+        List<Document> matches = vectorService.search(query, topK);
+
+        Map<Integer, Product> byId = new LinkedHashMap<>();
+        repo.findAllById(matches.stream()
+                        .map(doc -> ((Number) doc.getMetadata().get("productId")).intValue())
+                        .toList())
+                .forEach(product -> byId.put(product.getId(), product));
+
+        return matches.stream()
+                .map(doc -> byId.get(((Number) doc.getMetadata().get("productId")).intValue()))
+                .filter(product -> product != null)
+                .toList();
+    }
+
+    public void reindexAllProducts() {
+        vectorService.clearAll();
+        repo.findAll().forEach(vectorService::indexProduct);
     }
 }

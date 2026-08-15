@@ -4,12 +4,15 @@ import com.codewithangela.ecommerceapi.constants.Role;
 import com.codewithangela.ecommerceapi.dao.RefreshTokenRepo;
 import com.codewithangela.ecommerceapi.dto.AuthResponse;
 import com.codewithangela.ecommerceapi.dto.ChangePasswordRequest;
+import com.codewithangela.ecommerceapi.dto.ForgotPasswordRequest;
 import com.codewithangela.ecommerceapi.dto.RefreshTokenRequest;
 import com.codewithangela.ecommerceapi.dto.ResendVerificationRequest;
+import com.codewithangela.ecommerceapi.dto.ResetPasswordRequest;
 import com.codewithangela.ecommerceapi.dto.VerifyEmailRequest;
 import com.codewithangela.ecommerceapi.model.User;
 import com.codewithangela.ecommerceapi.service.EmailVerificationService;
 import com.codewithangela.ecommerceapi.service.JWTService;
+import com.codewithangela.ecommerceapi.service.PasswordResetService;
 import com.codewithangela.ecommerceapi.service.RefreshTokenService;
 import com.codewithangela.ecommerceapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +51,9 @@ public class UserController {
 
     @Autowired
     private EmailVerificationService emailVerificationService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
@@ -103,6 +109,19 @@ public class UserController {
         emailVerificationService.resend(request.email());
         return ResponseEntity.ok(Map.of("message",
                 "If that account exists and needs verification, we've sent an email."));
+    }
+
+    @PostMapping("/user-forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.email());
+        return ResponseEntity.ok(Map.of("message",
+                "If that account exists, we've sent a password reset email."));
+    }
+
+    @PostMapping("/user-reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        passwordResetService.reset(request.token(), request.newPassword());
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully."));
     }
 
     @PostMapping("/user-refresh-token")

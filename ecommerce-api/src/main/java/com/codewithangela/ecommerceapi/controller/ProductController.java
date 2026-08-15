@@ -29,6 +29,19 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
+    @GetMapping("products/search")
+    public List<Product> searchProducts(@RequestParam("q") String query,
+                                         @RequestParam(value = "topK", defaultValue = "5") int topK) {
+        return productService.searchProducts(query, topK);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("products/reindex")
+    public ResponseEntity<Void> reindexProducts() {
+        productService.reindexAllProducts();
+        return ResponseEntity.noContent().build();
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "add-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Product> addProduct(@ModelAttribute Product product, @RequestParam("file") MultipartFile file) {

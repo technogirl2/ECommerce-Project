@@ -25,6 +25,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, e.getMessage(), request);
     }
 
+    @ExceptionHandler(InvalidResetTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidResetToken(InvalidResetTokenException e,
+                                                                    HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, e.getMessage(), request);
+    }
+
     @ExceptionHandler(UnsupportedMediaTypeException.class)
     public ResponseEntity<ErrorResponse> handleUnsupportedMediaType(UnsupportedMediaTypeException e,
                                                                       HttpServletRequest request) {
