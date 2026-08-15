@@ -5,17 +5,19 @@ import ProductPopComponent from '../../components/ProductPopComponent/ProductPop
 import FilterPanel, { DEFAULT_FILTER_VALUE, type FilterValue } from '../../components/FilterPanel/FilterPanel'
 import { fetchSnackTypes } from '../../api/snackTypes'
 import { fetchAllInventory } from '../../api/inventory'
-import { API_BASE_URL } from '../../config/api'
-import { authFetch } from '../../util/authFetch'
+import { fetchAllProducts, searchProducts } from '../../api/products'
 import type { Product } from '../../types/product'
 import type { SnackType } from '../../types/snackType'
 import './SearchPage.css'
 
 const MAX_PRODUCTS = 20
+const SEARCH_DEBOUNCE_MS = 300
 
 function SearchPage() {
   const [query, setQuery] = useState('')
-  const [products, setProducts] = useState<Product[]>([])
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [searchResults, setSearchResults] = useState<Product[] | null>(null)
+  const [searchedQuery, setSearchedQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<FilterValue>(DEFAULT_FILTER_VALUE)
@@ -24,16 +26,10 @@ function SearchPage() {
   const [quantityByProductId, setQuantityByProductId] = useState<Record<number, number>>({})
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const loadProducts = async () => {
       try {
-        const response = await authFetch(`${API_BASE_URL}/products`)
-
-        if (!response.ok) {
-          throw new Error('Failed to load products')
-        }
-
-        const data = (await response.json()) as Product[]
-        setProducts(data.slice(0, MAX_PRODUCTS))
+        const data = await fetchAllProducts()
+        setAllProducts(data)
       } catch {
         setError('Unable to load products. Please try again later.')
       } finally {
@@ -52,12 +48,43 @@ function SearchPage() {
       }
     }
 
-    fetchProducts()
+    loadProducts()
     loadInventory()
     fetchSnackTypes()
       .then(setSnackTypes)
       .catch(() => setError('Unable to load snack types. Please try again later.'))
   }, [])
+
+  useEffect(() => {
+    const trimmed = query.trim()
+    if (!trimmed) return
+
+    let cancelled = false
+
+    const timer = setTimeout(async () => {
+      try {
+        const results = await searchProducts(trimmed)
+        if (!cancelled) {
+          setSearchResults(results)
+          setSearchedQuery(trimmed)
+        }
+      } catch {
+        if (!cancelled) setError('Unable to search products. Please try again later.')
+      }
+    }, SEARCH_DEBOUNCE_MS)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [query])
+
+  const trimmedQuery = query.trim()
+  const isSearching = trimmedQuery !== '' && searchedQuery !== trimmedQuery
+  const baseProducts = useMemo(
+    () => (trimmedQuery ? (searchResults ?? []) : allProducts.slice(0, MAX_PRODUCTS)),
+    [trimmedQuery, searchResults, allProducts],
+  )
 
   const categoryOptions = useMemo(
     () => snackTypes.map((snackType) => ({ value: String(snackType.id), label: snackType.name })),
@@ -65,17 +92,15 @@ function SearchPage() {
   )
 
   const brandOptions = useMemo(() => {
-    const brands = new Set(products.map((product) => product.brand))
+    const brands = new Set(allProducts.map((product) => product.brand))
     return Array.from(brands).sort((a, b) => a.localeCompare(b))
-  }, [products])
+  }, [allProducts])
 
   const visibleProducts = useMemo(() => {
-    const normalized = query.trim().toLowerCase()
     const minPrice = filter.minPrice ? Number(filter.minPrice) : null
     const maxPrice = filter.maxPrice ? Number(filter.maxPrice) : null
 
-    const filtered = products.filter((product) => {
-      if (normalized && !product.name.toLowerCase().startsWith(normalized)) return false
+    const filtered = baseProducts.filter((product) => {
       if (minPrice !== null && product.price < minPrice) return false
       if (maxPrice !== null && product.price > maxPrice) return false
       if (filter.brands.length > 0 && !filter.brands.includes(product.brand)) return false
@@ -97,9 +122,10 @@ function SearchPage() {
       case 'name-desc':
         return filtered.sort((a, b) => b.name.localeCompare(a.name))
       default:
+        // Preserve relevance order returned by the semantic search backend.
         return filtered
     }
-  }, [query, products, filter])
+  }, [baseProducts, filter])
 
   return (
     <>
@@ -116,6 +142,8 @@ function SearchPage() {
             <p className="search-page-empty">Loading snacks...</p>
           ) : error ? (
             <p className="search-page-empty">{error}</p>
+          ) : isSearching ? (
+            <p className="search-page-empty">Searching...</p>
           ) : visibleProducts.length > 0 ? (
             visibleProducts.map((product) => (
               <ProductCard

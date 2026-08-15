@@ -7,6 +7,8 @@ import Footer from './components/Footer/Footer'
 import LoginPage from './pages/LoginPage/LoginPage'
 import RegisterPage from './pages/RegisterPage/RegisterPage'
 import VerifyEmailPage from './pages/VerifyEmailPage/VerifyEmailPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage'
 import SearchPage from './pages/SearchPage/SearchPage'
 import CheckoutPage from './pages/CheckoutPage/CheckoutPage'
 import OrderDetailPage from './pages/OrderDetailPage/OrderDetailPage'
@@ -22,6 +24,8 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route
           path="/searchPage"
           element={

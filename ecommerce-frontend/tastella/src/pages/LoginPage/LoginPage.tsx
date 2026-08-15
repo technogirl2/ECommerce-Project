@@ -72,13 +72,17 @@ function LoginPage() {
   const handleResend = async () => {
     setResendState('sending')
     try {
-      await fetch(`${API_BASE_URL}/user-resend-verification`, {
+      const response = await fetch(`${API_BASE_URL}/user-resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       })
-    } finally {
+
+      if (!response.ok) throw new Error('Failed to resend verification email')
       setResendState('sent')
+    } catch {
+      setResendState('idle')
+      setError('Unable to resend verification email. Please try again.')
     }
   }
 
@@ -103,7 +107,12 @@ function LoginPage() {
           </label>
 
           <label className="login-field">
-            <span>Password</span>
+            <div className="login-field-label-row">
+              <span>Password</span>
+              <Link to="/forgot-password" className="login-forgot-link">
+                Forgot password?
+              </Link>
+            </div>
             <div className="login-password-wrap">
               <input
                 type={showPassword ? 'text' : 'password'}
