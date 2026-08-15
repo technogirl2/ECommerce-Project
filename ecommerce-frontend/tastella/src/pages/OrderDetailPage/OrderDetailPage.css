@@ -34,6 +34,12 @@
   font-size: 14px;
 }
 
+.order-detail-email-notice {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
 .order-detail-status {
   flex-shrink: 0;
   padding: 6px 14px;

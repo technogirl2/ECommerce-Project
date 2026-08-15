@@ -13,7 +13,7 @@ function decodeToken(token: string): DecodedToken | null {
   }
 }
 
-export function getUsernameFromToken(token: string): string | null {
+export function getEmailFromToken(token: string): string | null {
   const decoded = decodeToken(token)
   return typeof decoded?.sub === 'string' ? decoded.sub : null
 }

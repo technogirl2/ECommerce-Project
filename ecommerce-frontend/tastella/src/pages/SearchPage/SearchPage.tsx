@@ -3,10 +3,12 @@ import Header from '../../components/Header/Header'
 import ProductCard from '../../components/ProductCard/ProductCard'
 import ProductPopComponent from '../../components/ProductPopComponent/ProductPopComponent'
 import FilterPanel, { DEFAULT_FILTER_VALUE, type FilterValue } from '../../components/FilterPanel/FilterPanel'
-import { SNACK_TYPE_OPTIONS } from '../../constants/snackTypes'
+import { fetchSnackTypes } from '../../api/snackTypes'
+import { fetchAllInventory } from '../../api/inventory'
 import { API_BASE_URL } from '../../config/api'
 import { authFetch } from '../../util/authFetch'
 import type { Product } from '../../types/product'
+import type { SnackType } from '../../types/snackType'
 import './SearchPage.css'
 
 const MAX_PRODUCTS = 20
@@ -18,6 +20,8 @@ function SearchPage() {
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<FilterValue>(DEFAULT_FILTER_VALUE)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [snackTypes, setSnackTypes] = useState<SnackType[]>([])
+  const [quantityByProductId, setQuantityByProductId] = useState<Record<number, number>>({})
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -37,8 +41,28 @@ function SearchPage() {
       }
     }
 
+    const loadInventory = async () => {
+      try {
+        const inventory = await fetchAllInventory()
+        setQuantityByProductId(
+          Object.fromEntries(inventory.map((item) => [item.product.id, item.quantity])),
+        )
+      } catch {
+        // Stock badges are a nice-to-have; the server still rejects out-of-stock purchases.
+      }
+    }
+
     fetchProducts()
+    loadInventory()
+    fetchSnackTypes()
+      .then(setSnackTypes)
+      .catch(() => setError('Unable to load snack types. Please try again later.'))
   }, [])
+
+  const categoryOptions = useMemo(
+    () => snackTypes.map((snackType) => ({ value: String(snackType.id), label: snackType.name })),
+    [snackTypes],
+  )
 
   const brandOptions = useMemo(() => {
     const brands = new Set(products.map((product) => product.brand))
@@ -57,7 +81,7 @@ function SearchPage() {
       if (filter.brands.length > 0 && !filter.brands.includes(product.brand)) return false
       if (
         filter.categories.length > 0 &&
-        !filter.categories.includes(product.snackType)
+        !filter.categories.includes(String(product.snackType.id))
       )
         return false
       return true
@@ -85,7 +109,7 @@ function SearchPage() {
           value={filter}
           onChange={setFilter}
           brandOptions={brandOptions}
-          categoryOptions={SNACK_TYPE_OPTIONS}
+          categoryOptions={categoryOptions}
         />
         <div className="search-page-results">
           {isLoading ? (
@@ -102,6 +126,7 @@ function SearchPage() {
                 imageUrl={product.imageUrl}
                 brand={product.brand}
                 snackType={product.snackType}
+                quantity={quantityByProductId[product.id]}
                 onClick={() => setSelectedProduct(product)}
               />
             ))
@@ -114,6 +139,7 @@ function SearchPage() {
       {selectedProduct && (
         <ProductPopComponent
           product={selectedProduct}
+          quantity={quantityByProductId[selectedProduct.id]}
           onClose={() => setSelectedProduct(null)}
         />
       )}

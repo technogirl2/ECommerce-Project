@@ -4,14 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "cloudflare.r2")
+@ConfigurationProperties(prefix = "aws.ses")
 @Getter
 @Setter
-public class CloudflareProperties {
+public class SesProperties {
 
-    private String endpoint;
+    private String region;
     private String accessKey;
     private String secretKey;
-    private String bucket;
-    private String publicUrl;
+    private String fromAddress;
 }

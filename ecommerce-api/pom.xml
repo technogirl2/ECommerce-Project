@@ -28,7 +28,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <cloudflare-aws-sdk-version>2.31.50</cloudflare-aws-sdk-version>
+        <aws-sdk-version>2.31.50</aws-sdk-version>
     </properties>
     <dependencies>
         <dependency>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
-            <version>${cloudflare-aws-sdk-version}</version>
+            <version>${aws-sdk-version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -75,7 +75,15 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>apache-client</artifactId>
-            <version>${cloudflare-aws-sdk-version}</version>
+            <version>${aws-sdk-version}</version>
+        </dependency>
+
+        <!-- AWS SDK's SES integration -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>ses</artifactId>
+            <version>${aws-sdk-version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

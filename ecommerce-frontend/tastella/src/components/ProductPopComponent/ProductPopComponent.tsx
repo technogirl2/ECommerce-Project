@@ -1,23 +1,23 @@
 import { useEffect, useState } from 'react'
-import { getSnackTypeLabel } from '../../constants/snackTypes'
 import { useCart } from '../../context/CartContext'
 import type { Product } from '../../types/product'
 import './ProductPopComponent.css'
 
 interface ProductPopComponentProps {
   product: Product
+  quantity?: number
   onClose: () => void
 }
 
-const QUANTITY_OPTIONS = Array.from({ length: 10 }, (_, i) => i + 1)
-
-function ProductPopComponent({ product, onClose }: ProductPopComponentProps) {
+function ProductPopComponent({ product, quantity: stockQuantity, onClose }: ProductPopComponentProps) {
   const { getCartItemForProduct, addItem, updateItemQuantity, removeItem, refreshCart } =
     useCart()
   const cartItem = getCartItemForProduct(product.id)
   const [quantityOverride, setQuantityOverride] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const quantity = quantityOverride ?? cartItem?.quantity ?? 1
+  const isOutOfStock = stockQuantity === 0
+  const exceedsStock = stockQuantity !== undefined && quantity > stockQuantity
 
   useEffect(() => {
     refreshCart()
@@ -98,7 +98,7 @@ function ProductPopComponent({ product, onClose }: ProductPopComponentProps) {
           <div className="product-pop-info">
             <h2 className="product-pop-name">{product.name}</h2>
             <p className="product-pop-meta">
-              {product.brand} · {getSnackTypeLabel(product.snackType)}
+              {product.brand} · {product.snackType.name}
             </p>
           </div>
 
@@ -111,19 +111,26 @@ function ProductPopComponent({ product, onClose }: ProductPopComponentProps) {
               </p>
             )}
 
-            <label className="product-pop-quantity">
-              <span>Quantity</span>
-              <select
-                value={quantity}
-                onChange={(e) => setQuantityOverride(Number(e.target.value))}
-              >
-                {QUANTITY_OPTIONS.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {isOutOfStock && <p className="product-pop-out-of-stock">Out of stock</p>}
+
+            {!isOutOfStock && (
+              <label className="product-pop-quantity">
+                <span>Quantity</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={stockQuantity}
+                  value={quantity}
+                  onChange={(e) => {
+                    const next = Number(e.target.value)
+                    if (!Number.isNaN(next)) setQuantityOverride(next)
+                  }}
+                />
+                {exceedsStock && (
+                  <span className="product-pop-quantity-hint">Only {stockQuantity} left in stock.</span>
+                )}
+              </label>
+            )}
 
             {isInCart ? (
               <>
@@ -131,7 +138,13 @@ function ProductPopComponent({ product, onClose }: ProductPopComponentProps) {
                   type="button"
                   className="product-pop-add"
                   onClick={handleUpdateQuantity}
-                  disabled={isSubmitting || quantity === cartItem.quantity}
+                  disabled={
+                    isSubmitting ||
+                    isOutOfStock ||
+                    exceedsStock ||
+                    quantity < 1 ||
+                    quantity === cartItem.quantity
+                  }
                 >
                   Update cart
                 </button>
@@ -149,9 +162,9 @@ function ProductPopComponent({ product, onClose }: ProductPopComponentProps) {
                 type="button"
                 className="product-pop-add"
                 onClick={handleAddToCart}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isOutOfStock || exceedsStock || quantity < 1}
               >
-                Add to cart
+                {isOutOfStock ? 'Out of stock' : 'Add to cart'}
               </button>
             )}
           </div>

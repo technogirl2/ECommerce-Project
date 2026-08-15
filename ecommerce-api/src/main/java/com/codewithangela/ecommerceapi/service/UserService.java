@@ -21,8 +21,8 @@ public class UserService {
         return repo.findAll();
     }
 
-    public User getUserByUsername(String username) {
-        return repo.findByUsername(username);
+    public User getUserByEmail(String email) {
+        return repo.findByEmail(email);
     }
 
     public User updatePassword(User user, String newHashedPassword) {

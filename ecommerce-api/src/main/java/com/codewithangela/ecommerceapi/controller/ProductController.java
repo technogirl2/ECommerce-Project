@@ -56,13 +56,19 @@ public class ProductController {
     @PostMapping(value = "update-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Product> updateProduct(@ModelAttribute Product product,
                                @RequestParam(value = "file", required = false) MultipartFile file) {
-        if (file != null && !file.isEmpty()) {
-            product.setImageUrl(mediaService.uploadFile(file, "products"));
-        } else {
-            productService.getProductById(product.getId())
-                    .ifPresent(existing -> product.setImageUrl(existing.getImageUrl()));
-        }
+        String oldImageUrl = productService.getProductById(product.getId())
+                .map(Product::getImageUrl)
+                .orElse(null);
+
+        boolean replacingImage = file != null && !file.isEmpty();
+        product.setImageUrl(replacingImage ? mediaService.uploadFile(file, "products") : oldImageUrl);
+
         Product updated = productService.updateProduct(product);
+
+        if (replacingImage && oldImageUrl != null) {
+            mediaService.deleteFile(oldImageUrl);
+        }
+
         return ResponseEntity.ok(updated);
     }
 }

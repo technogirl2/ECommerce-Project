@@ -4,7 +4,7 @@ import Header from '../../components/Header/Header'
 import EyeIcon from '../../components/EyeIcon/EyeIcon'
 import { API_BASE_URL } from '../../config/api'
 import { authFetch } from '../../util/authFetch'
-import { getRoleFromToken, getUsernameFromToken } from '../../util/jwt'
+import { getRoleFromToken, getEmailFromToken } from '../../util/jwt'
 import './AccountSettingsPage.css'
 
 interface PasswordForm {
@@ -26,7 +26,7 @@ const EMPTY_VISIBILITY: Record<keyof PasswordForm, boolean> = {
 }
 
 function AccountSettingsPage() {
-  const [username, setUsername] = useState<string | null>(null)
+  const [email, setEmail] = useState<string | null>(null)
   const [role, setRole] = useState<string | null>(null)
   const [form, setForm] = useState<PasswordForm>(EMPTY_FORM)
   const [visibility, setVisibility] = useState(EMPTY_VISIBILITY)
@@ -37,7 +37,7 @@ function AccountSettingsPage() {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      setUsername(getUsernameFromToken(token))
+      setEmail(getEmailFromToken(token))
       setRole(getRoleFromToken(token))
     }
   }, [])
@@ -101,8 +101,8 @@ function AccountSettingsPage() {
         <section className="account-settings-section">
           <h2>Profile</h2>
           <div className="account-settings-row">
-            <span className="account-settings-label">Username</span>
-            <span className="account-settings-value">{username ?? '—'}</span>
+            <span className="account-settings-label">Email</span>
+            <span className="account-settings-value">{email ?? '—'}</span>
           </div>
           <div className="account-settings-row">
             <span className="account-settings-label">Role</span>

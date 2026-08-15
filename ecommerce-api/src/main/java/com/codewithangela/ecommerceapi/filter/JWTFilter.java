@@ -1,7 +1,7 @@
 package com.codewithangela.ecommerceapi.filter;
 
 import com.codewithangela.ecommerceapi.service.JWTService;
-import com.codewithangela.ecommerceapi.service.authUserDetailService;
+import com.codewithangela.ecommerceapi.service.AuthUserDetailService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,21 +33,21 @@ public class JWTFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         String token = "";
-        String userName = null;
+        String email = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             try {
-                userName = jwtService.extractUserName(token);
+                email = jwtService.extractEmail(token);
             } catch (JwtException e) {
-                // expired/invalid token: leave userName null so the request falls through
+                // expired/invalid token: leave email null so the request falls through
                 // unauthenticated and Spring Security returns a 401 instead of a 500
             }
         }
 
         // if not null, already verified
-        if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = applicationContext.getBean(authUserDetailService.class).loadUserByUsername(userName);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = applicationContext.getBean(AuthUserDetailService.class).loadUserByUsername(email);
             if (jwtService.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

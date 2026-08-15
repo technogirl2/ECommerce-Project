@@ -59,7 +59,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         request -> request
                                 // allow user to access these endpoints, no need for authentication
-                                .requestMatchers("/user-register", "/user-login", "/user-refresh-token", "/user-logout")
+                                .requestMatchers("/user-register", "/user-login", "/user-refresh-token", "/user-logout",
+                                        "/verify-email", "/user-resend-verification")
                                 .permitAll()
                                 .anyRequest().authenticated())
                 // unauthenticated requests get 401, not the default 403 -

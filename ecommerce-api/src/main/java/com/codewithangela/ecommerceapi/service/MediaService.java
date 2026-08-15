@@ -20,10 +20,10 @@ import java.util.UUID;
 public class MediaService {
     private final S3Client s3Client;
 
-    @Value("${cloudflare.r2.bucket}")
+    @Value("${aws.s3.bucket}")
     private String bucket;
 
-    @Value("${cloudflare.r2.publicUrl}")
+    @Value("${aws.s3.publicUrl}")
     private String publicUrl;
 
     public String uploadFile(MultipartFile file, String folder) {
@@ -55,7 +55,7 @@ public class MediaService {
         try {
             s3Client.putObject(req, RequestBody.fromBytes(file.getBytes()));
         } catch (IOException e) {
-            throw new FileUploadException("File upload to Cloudflare R2 failed", e);
+            throw new FileUploadException("File upload to Amazon S3 failed", e);
         }
 
         return publicUrl + "/" + key;

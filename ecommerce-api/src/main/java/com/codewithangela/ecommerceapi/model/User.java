@@ -15,11 +15,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(unique = true)
-    private String username;
+    @Column(unique = true, nullable = false)
+    private String email;
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.USER;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean emailVerified = false;
 }

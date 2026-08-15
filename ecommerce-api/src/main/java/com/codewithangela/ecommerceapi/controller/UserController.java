@@ -5,7 +5,10 @@ import com.codewithangela.ecommerceapi.dao.RefreshTokenRepo;
 import com.codewithangela.ecommerceapi.dto.AuthResponse;
 import com.codewithangela.ecommerceapi.dto.ChangePasswordRequest;
 import com.codewithangela.ecommerceapi.dto.RefreshTokenRequest;
+import com.codewithangela.ecommerceapi.dto.ResendVerificationRequest;
+import com.codewithangela.ecommerceapi.dto.VerifyEmailRequest;
 import com.codewithangela.ecommerceapi.model.User;
+import com.codewithangela.ecommerceapi.service.EmailVerificationService;
 import com.codewithangela.ecommerceapi.service.JWTService;
 import com.codewithangela.ecommerceapi.service.RefreshTokenService;
 import com.codewithangela.ecommerceapi.service.UserService;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,6 +46,9 @@ public class UserController {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
+    @Autowired
+    private EmailVerificationService emailVerificationService;
+
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     @GetMapping("users")
@@ -50,14 +57,19 @@ public class UserController {
     }
 
     @PostMapping("user-login")
-    public ResponseEntity<AuthResponse> login(@RequestBody User user) {
-        // authenticate() throws BadCredentialsException on failure, so reaching
-        // this line means auth succeeded
-        authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+    public ResponseEntity<?> login(@RequestBody User user) {
+        try {
+            // authenticate() throws BadCredentialsException on failure, so reaching
+            // this line means auth succeeded
+            authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+        } catch (DisabledException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "EMAIL_NOT_VERIFIED"));
+        }
 
-        User authenticatedUser = userService.getUserByUsername(user.getUsername());
-        String accessToken = jwtService.generateToken(authenticatedUser.getUsername(), authenticatedUser.getRole().name());
+        User authenticatedUser = userService.getUserByEmail(user.getEmail());
+        String accessToken = jwtService.generateToken(authenticatedUser.getEmail(), authenticatedUser.getRole().name());
         String refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getId()).getToken();
 
         return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken));
@@ -65,18 +77,32 @@ public class UserController {
 
     @PostMapping("user-register")
     public ResponseEntity<?> register(@RequestBody User user) {
-        if (userService.getUserByUsername(user.getUsername()) != null) {
+        if (userService.getUserByEmail(user.getEmail()) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "Username already exists."));
+                    .body(Map.of("error", "Email already exists."));
         }
 
         String rawPassword = user.getPassword();
         user.setPassword(encoder.encode(rawPassword));
         user.setRole(Role.USER); // never trust a client-supplied role on self-registration
         User savedUser = userService.saveUser(user);
+        emailVerificationService.issueAndSendToken(savedUser);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("username", savedUser.getUsername()));
+                .body(Map.of("email", savedUser.getEmail()));
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailRequest request) {
+        emailVerificationService.verify(request.token());
+        return ResponseEntity.ok(Map.of("message", "Email verified successfully."));
+    }
+
+    @PostMapping("/user-resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestBody ResendVerificationRequest request) {
+        emailVerificationService.resend(request.email());
+        return ResponseEntity.ok(Map.of("message",
+                "If that account exists and needs verification, we've sent an email."));
     }
 
     @PostMapping("/user-refresh-token")
@@ -90,7 +116,7 @@ public class UserController {
                         return ResponseEntity.badRequest()
                                 .body(Map.of("error", "Refresh token expired. Please login again."));
                     }
-                    String newJwt = jwtService.generateToken(token.getUser().getUsername(), token.getUser().getRole().name());
+                    String newJwt = jwtService.generateToken(token.getUser().getEmail(), token.getUser().getRole().name());
                     return ResponseEntity.ok(Map.of("token", newJwt));
                 })
                 .orElse(ResponseEntity.badRequest().body(Map.of("error", "Invalid refresh token.")));
@@ -99,7 +125,7 @@ public class UserController {
     @PutMapping("user-password")
     public ResponseEntity<?> changePassword(Authentication authentication,
                                              @RequestBody ChangePasswordRequest request) {
-        User user = userService.getUserByUsername(authentication.getName());
+        User user = userService.getUserByEmail(authentication.getName());
 
         if (!encoder.matches(request.oldPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

@@ -1,0 +1,43 @@
+.verify-email-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 32px 20px;
+}
+
+.verify-email-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 360px;
+  padding: 32px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+  text-align: left;
+}
+
+.verify-email-title {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: normal;
+  text-align: left;
+}
+
+.verify-email-message {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.verify-email-link {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

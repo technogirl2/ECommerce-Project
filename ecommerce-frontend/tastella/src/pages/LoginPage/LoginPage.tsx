@@ -10,10 +10,12 @@ import './LoginPage.css'
 function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [needsVerification, setNeedsVerification] = useState(false)
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMessage, setSuccessMessage] = useState(
     (location.state as { message?: string } | null)?.message ?? '',
@@ -30,17 +32,25 @@ function LoginPage() {
     e.preventDefault()
     setError('')
     setSuccessMessage('')
+    setNeedsVerification(false)
+    setResendState('idle')
     setIsSubmitting(true)
 
     try {
       const response = await fetch(`${API_BASE_URL}/user-login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       })
 
       if (!response.ok) {
-        setError('Incorrect username or password')
+        const data = (await response.json().catch(() => null)) as { error?: string } | null
+        if (data?.error === 'EMAIL_NOT_VERIFIED') {
+          setError('Please verify your email before logging in.')
+          setNeedsVerification(true)
+        } else {
+          setError('Incorrect email or password')
+        }
         return
       }
 
@@ -59,6 +69,19 @@ function LoginPage() {
     }
   }
 
+  const handleResend = async () => {
+    setResendState('sending')
+    try {
+      await fetch(`${API_BASE_URL}/user-resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+    } finally {
+      setResendState('sent')
+    }
+  }
+
   return (
     <>
       <Header showSearch={false} />
@@ -69,12 +92,12 @@ function LoginPage() {
           {successMessage && <p className="login-success">{successMessage}</p>}
 
           <label className="login-field">
-            <span>Username</span>
+            <span>Email</span>
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               required
             />
           </label>
@@ -101,6 +124,23 @@ function LoginPage() {
           </label>
 
           {error && <p className="login-error">{error}</p>}
+
+          {needsVerification && (
+            <p className="login-resend">
+              {resendState === 'sent' ? (
+                'Verification email sent. Check your inbox.'
+              ) : (
+                <button
+                  type="button"
+                  className="login-resend-button"
+                  onClick={handleResend}
+                  disabled={resendState === 'sending'}
+                >
+                  {resendState === 'sending' ? 'Sending...' : 'Resend verification email'}
+                </button>
+              )}
+            </p>
+          )}
 
           <button type="submit" className="login-submit" disabled={isSubmitting}>
             {isSubmitting ? 'Logging in...' : 'Log in'}
