@@ -79,7 +79,7 @@ function OrderDetailPage() {
                 Order #{orderNumber} · Placed {formatDate(order.createdAt)}
               </p>
               <p className="order-detail-email-notice">
-                A confirmation email is on its way to your inbox.
+                We'll email you a receipt if a confirmation email can be sent. You can always find your order details here.
               </p>
             </div>
 
