@@ -66,14 +66,18 @@ public class ProductService {
     public List<Product> searchProducts(String query, int topK) {
         List<Document> matches = vectorService.search(query, topK);
 
+        List<Integer> productIds = matches.stream()
+                .map(doc -> doc.getMetadata().get("productId"))
+                .filter(Number.class::isInstance)
+                .map(value -> ((Number) value).intValue())
+                .toList();
+
         Map<Integer, Product> byId = new LinkedHashMap<>();
-        repo.findAllById(matches.stream()
-                        .map(doc -> ((Number) doc.getMetadata().get("productId")).intValue())
-                        .toList())
+        repo.findAllById(productIds)
                 .forEach(product -> byId.put(product.getId(), product));
 
-        return matches.stream()
-                .map(doc -> byId.get(((Number) doc.getMetadata().get("productId")).intValue()))
+        return productIds.stream()
+                .map(byId::get)
                 .filter(product -> product != null)
                 .toList();
     }
