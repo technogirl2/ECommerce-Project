@@ -3,20 +3,28 @@ package com.codewithangela.ecommerceapi.service;
 import com.codewithangela.ecommerceapi.constants.DeliveryOption;
 import com.codewithangela.ecommerceapi.constants.OrderStatus;
 import com.codewithangela.ecommerceapi.constants.PaymentStatus;
+import com.codewithangela.ecommerceapi.dao.OrderItemRepo;
 import com.codewithangela.ecommerceapi.dao.OrderRepo;
 import com.codewithangela.ecommerceapi.dto.CheckoutRequest;
+import com.codewithangela.ecommerceapi.dto.OrderTrendPointDto;
+import com.codewithangela.ecommerceapi.dto.TopProductDto;
 import com.codewithangela.ecommerceapi.exception.EmailSendException;
 import com.codewithangela.ecommerceapi.model.*;
 import com.codewithangela.ecommerceapi.util.EmailTemplateLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.HtmlUtils;
 
+import java.sql.Timestamp;
 import java.text.NumberFormat;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +40,9 @@ public class OrderService {
 
     @Autowired
     private OrderRepo orderRepo;
+
+    @Autowired
+    private OrderItemRepo orderItemRepo;
 
     @Autowired
     private CartService cartService;
@@ -155,6 +166,33 @@ public class OrderService {
 
     public Optional<Order> getOrderForUser(User user, int orderId) {
         return orderRepo.findByIdAndUserId(orderId, user.getId());
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepo.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+    }
+
+    public Optional<Order> getOrderById(int orderId) {
+        return orderRepo.findById(orderId);
+    }
+
+    public List<OrderTrendPointDto> getOrderTrends(int days) {
+        Instant since = Instant.now().minus(days, ChronoUnit.DAYS);
+        return orderRepo.findOrderTrendsSince(since).stream()
+                .map(row -> new OrderTrendPointDto(
+                        toInstant(row[0]),
+                        ((Number) row[1]).longValue(),
+                        ((Number) row[2]).doubleValue()))
+                .toList();
+    }
+
+    private static Instant toInstant(Object value) {
+        return value instanceof Timestamp timestamp ? timestamp.toInstant() : (Instant) value;
+    }
+
+    public List<TopProductDto> getTopProducts(int days, int limit) {
+        Instant since = Instant.now().minus(days, ChronoUnit.DAYS);
+        return orderItemRepo.findTopProductsSince(since, PageRequest.of(0, limit));
     }
 
     private double deliveryFeeFor(DeliveryOption option) {

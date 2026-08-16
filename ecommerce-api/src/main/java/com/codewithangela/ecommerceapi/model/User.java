@@ -1,6 +1,7 @@
 package com.codewithangela.ecommerceapi.model;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,6 +18,8 @@ public class User {
 
     @Column(unique = true, nullable = false)
     private String email;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Enumerated(EnumType.STRING)
