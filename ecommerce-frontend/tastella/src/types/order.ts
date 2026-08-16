@@ -22,8 +22,14 @@ export interface OrderItem {
   quantity: number
 }
 
+export interface OrderCustomer {
+  id: number
+  email: string
+}
+
 export interface Order {
   id: number
+  user?: OrderCustomer
   status: OrderStatus
   street: string
   city: string

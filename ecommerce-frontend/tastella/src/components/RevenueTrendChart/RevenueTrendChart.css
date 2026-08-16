@@ -1,0 +1,149 @@
+.revenue-trend-chart {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.revenue-trend-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.revenue-trend-chart-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-h);
+}
+
+.chart-table-toggle {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chart-table-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.revenue-trend-chart-empty {
+  color: var(--text);
+  padding: 40px 0;
+  text-align: center;
+}
+
+.revenue-trend-chart-plot {
+  position: relative;
+}
+
+.revenue-trend-chart-svg {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 760 / 260;
+  overflow: visible;
+}
+
+.chart-gridline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.chart-axis-label {
+  fill: var(--text);
+  font-size: 11px;
+}
+
+.chart-direct-label {
+  fill: var(--text-h);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.revenue-trend-chart-area {
+  fill: var(--accent-bg);
+}
+
+.revenue-trend-chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.revenue-trend-chart-end-dot {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.chart-crosshair {
+  stroke: var(--text);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+
+.chart-hover-dot {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.chart-tooltip {
+  position: absolute;
+  transform: translate(-50%, -120%);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--text-h);
+  color: var(--bg);
+  font-size: 12px;
+  line-height: 145%;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+}
+
+.chart-tooltip-value {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.chart-tooltip-meta {
+  opacity: 0.8;
+}
+
+.chart-table-wrap {
+  overflow-x: auto;
+}
+
+.chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.chart-table th,
+.chart-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-h);
+}
+
+.chart-table th {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.chart-table td {
+  font-variant-numeric: tabular-nums;
+}

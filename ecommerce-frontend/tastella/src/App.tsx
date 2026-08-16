@@ -15,6 +15,9 @@ import OrderDetailPage from './pages/OrderDetailPage/OrderDetailPage'
 import OrderHistoryPage from './pages/OrderHistoryPage/OrderHistoryPage'
 import AccountSettingsPage from './pages/AccountSettingsPage/AccountSettingsPage'
 import AdminProductsPage from './pages/AdminProductsPage/AdminProductsPage'
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage/AdminAnalyticsPage'
+import AdminOrdersPage from './pages/AdminOrdersPage/AdminOrdersPage'
+import AdminOrderDetailPage from './pages/AdminOrderDetailPage/AdminOrderDetailPage'
 
 function App() {
   return (
@@ -71,6 +74,30 @@ function App() {
           element={
             <AdminRoute>
               <AdminProductsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/analytics"
+          element={
+            <AdminRoute>
+              <AdminAnalyticsPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <AdminOrdersPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/orders/:id"
+          element={
+            <AdminRoute>
+              <AdminOrderDetailPage />
             </AdminRoute>
           }
         />

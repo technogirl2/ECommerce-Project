@@ -1,0 +1,165 @@
+.top-products-chart {
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.top-products-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.top-products-chart-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-h);
+}
+
+.chart-table-toggle {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chart-table-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.top-products-chart-empty {
+  color: var(--text);
+  padding: 40px 0;
+  text-align: center;
+}
+
+.top-products-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top-products-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 160px) 1fr 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.top-products-row:hover,
+.top-products-row:focus-visible {
+  background: var(--code-bg);
+  outline: none;
+}
+
+.top-products-thumb {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--code-bg);
+}
+
+.top-products-thumb-placeholder {
+  background: var(--code-bg);
+}
+
+.top-products-name {
+  font-size: 13px;
+  color: var(--text-h);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-products-bar-track {
+  height: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.top-products-bar {
+  height: 16px;
+  max-height: 16px;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.top-products-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.top-products-tooltip {
+  position: absolute;
+  right: 8px;
+  top: -4px;
+  transform: translateY(-100%);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--text-h);
+  color: var(--bg);
+  font-size: 12px;
+  line-height: 145%;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 1;
+}
+
+.top-products-row:hover .top-products-tooltip,
+.top-products-row:focus-visible .top-products-tooltip {
+  opacity: 1;
+}
+
+.chart-tooltip-value {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.chart-tooltip-meta {
+  opacity: 0.8;
+}
+
+.chart-table-wrap {
+  overflow-x: auto;
+}
+
+.chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.chart-table th,
+.chart-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-h);
+}
+
+.chart-table th {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.chart-table td {
+  font-variant-numeric: tabular-nums;
+}

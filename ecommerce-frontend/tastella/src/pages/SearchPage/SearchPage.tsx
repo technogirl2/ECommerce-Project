@@ -3,6 +3,7 @@ import Header from '../../components/Header/Header'
 import ProductCard from '../../components/ProductCard/ProductCard'
 import ProductPopComponent from '../../components/ProductPopComponent/ProductPopComponent'
 import FilterPanel, { DEFAULT_FILTER_VALUE, type FilterValue } from '../../components/FilterPanel/FilterPanel'
+import ChatWidget from '../../components/ChatWidget/ChatWidget'
 import { fetchSnackTypes } from '../../api/snackTypes'
 import { fetchAllInventory } from '../../api/inventory'
 import { fetchAllProducts, searchProducts } from '../../api/products'
@@ -171,6 +172,8 @@ function SearchPage() {
           onClose={() => setSelectedProduct(null)}
         />
       )}
+
+      <ChatWidget onSelectProduct={setSelectedProduct} />
     </>
   )
 }

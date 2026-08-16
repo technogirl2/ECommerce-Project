@@ -1,0 +1,73 @@
+.admin-analytics-page {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.admin-analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.admin-analytics-header h1 {
+  margin: 0;
+  text-align: left;
+}
+
+.admin-analytics-range {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.admin-analytics-range button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-analytics-range button.is-active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.admin-analytics-empty {
+  color: var(--text);
+  padding: 40px 0;
+  text-align: center;
+}
+
+.admin-analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.admin-analytics-charts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .admin-analytics-kpis {
+    grid-template-columns: 1fr;
+  }
+}
