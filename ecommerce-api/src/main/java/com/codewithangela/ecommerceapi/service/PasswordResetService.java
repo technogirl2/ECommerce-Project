@@ -62,6 +62,10 @@ public class PasswordResetService {
     }
 
     public void reset(String token, String newPassword) {
+        if (token == null || token.isBlank()) {
+            throw new InvalidResetTokenException("Invalid password reset token.");
+        }
+
         if (newPassword == null || newPassword.isBlank()) {
             throw new IllegalArgumentException("New password is required.");
         }
