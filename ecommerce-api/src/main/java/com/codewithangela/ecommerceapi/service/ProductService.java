@@ -57,7 +57,7 @@ public class ProductService {
 
     public Product updateProduct(Product product) {
 
-        // JPA dp upsert operation, so save = update
+        // JPA does upsert operation, so save = update
         Product saved = repo.save(product);
         vectorService.indexProduct(saved);
         return saved;
