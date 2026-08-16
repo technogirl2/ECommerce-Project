@@ -58,9 +58,16 @@ function SearchPage() {
 
   useEffect(() => {
     const trimmed = query.trim()
-    if (!trimmed) return
+
+    if (!trimmed) {
+      setSearchResults(null)
+      setSearchedQuery('')
+      setError('')
+      return
+    }
 
     let cancelled = false
+    setError('')
 
     const timer = setTimeout(async () => {
       try {
