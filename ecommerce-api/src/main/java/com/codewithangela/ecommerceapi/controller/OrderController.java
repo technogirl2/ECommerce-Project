@@ -60,7 +60,8 @@ public class OrderController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("admin/analytics/order-trends")
     public List<OrderTrendPointDto> getOrderTrends(@RequestParam(defaultValue = "30") int days) {
-        return orderService.getOrderTrends(days);
+        int safeDays = Math.min(Math.max(days, 1), 365);
+        return orderService.getOrderTrends(safeDays);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
