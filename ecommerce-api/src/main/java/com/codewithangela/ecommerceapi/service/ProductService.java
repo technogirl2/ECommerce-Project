@@ -6,6 +6,7 @@ import com.codewithangela.ecommerceapi.model.Product;
 import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ public class ProductService {
         return repo.findById(id);
     }
 
+    @Transactional
     public Product addProduct(Product product) {
         Product saved = repo.save(product);
         inventoryService.createInventoryForProduct(saved);
@@ -43,6 +45,7 @@ public class ProductService {
         return saved;
     }
 
+    @Transactional
     public Optional<Product> deleteProduct(int id) {
         Optional<Product> existing = repo.findById(id);
         existing.ifPresent(product -> {
@@ -55,6 +58,7 @@ public class ProductService {
         return existing;
     }
 
+    @Transactional
     public Product updateProduct(Product product) {
 
         // JPA does upsert operation, so save = update
