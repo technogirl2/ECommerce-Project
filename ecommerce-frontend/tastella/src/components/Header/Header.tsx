@@ -93,10 +93,24 @@ function Header({
           </button>
           <button
             type="button"
-            className={isAdminView ? 'is-active' : ''}
+            className={location.pathname.startsWith('/admin/products') ? 'is-active' : ''}
             onClick={() => navigate('/admin/products')}
           >
-            Admin
+            Products
+          </button>
+          <button
+            type="button"
+            className={location.pathname.startsWith('/admin/analytics') ? 'is-active' : ''}
+            onClick={() => navigate('/admin/analytics')}
+          >
+            Analytics
+          </button>
+          <button
+            type="button"
+            className={location.pathname.startsWith('/admin/orders') ? 'is-active' : ''}
+            onClick={() => navigate('/admin/orders')}
+          >
+            Orders
           </button>
         </div>
       )}

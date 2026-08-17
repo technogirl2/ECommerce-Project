@@ -1,0 +1,27 @@
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  text-align: left;
+}
+
+.stat-tile-label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.stat-tile-value {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-h);
+  line-height: 120%;
+}
+
+.stat-tile-help {
+  font-size: 12px;
+  color: var(--text);
+}

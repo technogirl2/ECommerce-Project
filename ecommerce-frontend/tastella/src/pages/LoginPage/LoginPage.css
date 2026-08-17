@@ -52,6 +52,24 @@
   }
 }
 
+.login-field-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.login-forgot-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .login-password-wrap {
   position: relative;
   display: flex;

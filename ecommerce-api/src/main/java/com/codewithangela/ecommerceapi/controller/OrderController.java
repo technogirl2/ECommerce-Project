@@ -1,12 +1,15 @@
 package com.codewithangela.ecommerceapi.controller;
 
 import com.codewithangela.ecommerceapi.dto.CheckoutRequest;
+import com.codewithangela.ecommerceapi.dto.OrderTrendPointDto;
+import com.codewithangela.ecommerceapi.dto.TopProductDto;
 import com.codewithangela.ecommerceapi.model.Order;
 import com.codewithangela.ecommerceapi.model.User;
 import com.codewithangela.ecommerceapi.service.OrderService;
 import com.codewithangela.ecommerceapi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +41,35 @@ public class OrderController {
         return orderService.getOrderForUser(currentUser(authentication), id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/orders")
+    public List<Order> getAllOrders() {
+        return orderService.getAllOrders();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/orders/{id}")
+    public ResponseEntity<Order> getOrderByIdAdmin(@PathVariable int id) {
+        return orderService.getOrderById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/analytics/order-trends")
+    public List<OrderTrendPointDto> getOrderTrends(@RequestParam(defaultValue = "30") int days) {
+        int safeDays = Math.min(Math.max(days, 1), 365);
+        return orderService.getOrderTrends(safeDays);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("admin/analytics/top-products")
+    public List<TopProductDto> getTopProducts(
+            @RequestParam(defaultValue = "30") int days,
+            @RequestParam(defaultValue = "10") int limit) {
+        return orderService.getTopProducts(days, limit);
     }
 
     private User currentUser(Authentication authentication) {

@@ -122,8 +122,13 @@ function ProductPopComponent({ product, quantity: stockQuantity, onClose }: Prod
                   max={stockQuantity}
                   value={quantity}
                   onChange={(e) => {
-                    const next = Number(e.target.value)
-                    if (!Number.isNaN(next)) setQuantityOverride(next)
+                    const value = e.target.value
+                    if (value === '') {
+                      setQuantityOverride(null)
+                      return
+                    }
+                    const next = Number(value)
+                    if (Number.isInteger(next) && next > 0) setQuantityOverride(next)
                   }}
                 />
                 {exceedsStock && (
